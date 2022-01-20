@@ -87,4 +87,24 @@ describe('Test user registration functionality', () => {
 		const body = response.body;
 		expect(body.validationErrors.username).toBe('Username cannot be null');
 	});
+
+	it('returns "Email cannot be null" error', async () => {
+		const response = await postUser({
+			username: 'user1',
+			email: null,
+			password: 'P4ssword',
+		});
+		const body = response.body;
+		expect(body.validationErrors.email).toBe('Email cannot be null');
+	});
+
+	it('returns errors when both username and email are null', async () => {
+		const response = await postUser({
+			username: null,
+			email: null,
+			password: 'P4ssword',
+		});
+		const body = response.body;
+		expect(Object.keys(body.validationErrors)).toEqual(['username', 'email']);
+	});
 });
