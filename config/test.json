@@ -4,7 +4,7 @@
 		"username": "dbUser",
 		"password": "dbPass",
 		"dialect": "sqlite",
-		"storage": "./database-test.sqlite",
+		"storage": ":memory:",
 		"logging": false
 	}
 }
