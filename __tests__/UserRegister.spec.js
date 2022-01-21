@@ -142,4 +142,17 @@ describe('Test user registration functionality', () => {
 		const response = await postUser();
 		expect(response.body.validationErrors.email).toBe('Email already in use!');
 	});
+
+	it('returns errors when both username is null and the email is already in use', async () => {
+		await User.create({ ...validUser });
+		const response = await postUser({
+			username: null,
+			email: validUser.email,
+			password: validUser.password,
+		});
+
+		const body = response.body;
+		console.log(body.validationErrors);
+		expect(Object.keys(body.validationErrors)).toEqual(['username', 'email']);
+	});
 });
