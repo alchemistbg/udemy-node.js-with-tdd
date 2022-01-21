@@ -20,14 +20,13 @@ const validUser = {
 	username: 'user1',
 	email: 'user1@mail.com',
 	password: 'P4ssword',
-}
+};
 
 const postUser = (user = validUser) => {
 	return supertest(app).post('/api/1.0/users').send(user);
 };
 
 describe('Test user registration functionality', () => {
-
 	it('return 200 when signup request is valid', async () => {
 		const response = await postUser();
 		expect(response.status).toBe(200);
@@ -46,7 +45,7 @@ describe('Test user registration functionality', () => {
 
 	it('saves username and email to the database', async () => {
 		await postUser();
-		const userList = await User.findAll()
+		const userList = await User.findAll();
 		const savedUser = userList[0];
 		expect(savedUser.username).toBe('user1');
 		expect(savedUser.email).toBe('user1@mail.com');
@@ -104,7 +103,7 @@ describe('Test user registration functionality', () => {
 	// 	const body = response.body;
 	// 	expect(body.validationErrors[field]).toBe(expectedMessage);
 	// });
-	
+
 	// Second form of each
 	it.each`
 		field         | value               | expectedMessage
