@@ -163,6 +163,29 @@ describe('Test user registration functionality', () => {
 		console.log(body.validationErrors);
 		expect(Object.keys(body.validationErrors)).toEqual(['username', 'email']);
 	});
+
+	it('creates user in inactive mode', async () => {
+		await postUser();
+		const users = await User.findAll();
+		const savedUser = users[0];
+		expect(savedUser.inactive).toBe(true);
+	});
+
+	it('creates user in inactive mode even when body contains inactive set to false', async () => {
+		const activeUser = { ...validUser, inactive: false };
+		await postUser(activeUser);
+		const users = await User.findAll();
+		const savedUser = users[0];
+		expect(savedUser.inactive).toBe(true);
+	});
+
+	it('creates activation token when registering user', async () => {
+		await postUser();
+		const users = await User.findAll();
+		const savedUser = users[0];
+		console.log(savedUser.activationToken);
+		expect(savedUser.activationToken).toBeTruthy();
+	});
 describe('Internationalization', () => {
 	const username_null = 'Потребителското име не може да е празно!';
 	const username_size = 'Дължината на потребителското име трябва да е между 4 и 32 символа';
