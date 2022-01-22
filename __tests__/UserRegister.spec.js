@@ -104,25 +104,34 @@ describe('Test user registration functionality', () => {
 	// 	expect(body.validationErrors[field]).toBe(expectedMessage);
 	// });
 
+	const username_null = 'Username cannot be null!';
+	const username_size = 'Must have min 4 and max 32 characters!';
+	const email_null = 'Email cannot be null!';
+	const email_invalid = 'Email must be a valid email!';
+	const email_inuse = 'Email already in use!';
+	const password_null = 'Password cannot be null!';
+	const password_size = 'Must have min 8 and max 16 characters!';
+	const password_pattern = 'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!';
+
 	// Second form of each
 	it.each`
 		field         | value               | expectedMessage
-		${'username'} | ${null}             | ${'Username cannot be null!'}
-		${'username'} | ${'usr'}            | ${'Must have min 4 and max 32 characters!'}
-		${'username'} | ${'a'.repeat(33)}   | ${'Must have min 4 and max 32 characters!'}
-		${'email'}    | ${null}             | ${'Email cannot be null!'}
-		${'email'}    | ${'mail.com'}       | ${'Email must be a valid email!'}
-		${'email'}    | ${'user1.mail.com'} | ${'Email must be a valid email!'}
-		${'email'}    | ${'user1@mail'}     | ${'Email must be a valid email!'}
-		${'password'} | ${null}             | ${'Password cannot be null!'}
-		${'password'} | ${'P4sswor'}        | ${'Must have min 8 and max 16 characters!'}
-		${'password'} | ${'p'.repeat(17)}   | ${'Must have min 8 and max 16 characters!'}
-		${'password'} | ${'alllowercase'}   | ${'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!'}
-		${'password'} | ${'ALLUPPERCASE'}   | ${'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!'}
-		${'password'} | ${'123456789'}      | ${'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!'}
-		${'password'} | ${'lowerUPPER'}     | ${'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!'}
-		${'password'} | ${'lower4nd5678'}   | ${'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!'}
-		${'password'} | ${'UPPER1234567'}   | ${'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!'}
+		${'username'} | ${null}             | ${username_null}
+		${'username'} | ${'usr'}            | ${username_size}
+		${'username'} | ${'u'.repeat(33)}   | ${username_size}
+		${'email'}    | ${null}             | ${email_null}
+		${'email'}    | ${'mail.com'}       | ${email_invalid}
+		${'email'}    | ${'user1.mail.com'} | ${email_invalid}
+		${'email'}    | ${'user1@mail'}     | ${email_invalid}
+		${'password'} | ${null}             | ${password_null}
+		${'password'} | ${'P4sswor'}        | ${password_size}
+		${'password'} | ${'p'.repeat(17)}   | ${password_size}
+		${'password'} | ${'alllowercase'}   | ${password_pattern}
+		${'password'} | ${'ALLUPPERCASE'}   | ${password_pattern}
+		${'password'} | ${'123456789'}      | ${password_pattern}
+		${'password'} | ${'lowerUPPER'}     | ${password_pattern}
+		${'password'} | ${'lower4nd5678'}   | ${password_pattern}
+		${'password'} | ${'UPPER1234567'}   | ${password_pattern}
 	`('returns $expectedMessage when $field is $value', async ({ field, value, expectedMessage }) => {
 		const user = {
 			username: 'user1',
@@ -136,10 +145,10 @@ describe('Test user registration functionality', () => {
 		expect(body.validationErrors[field]).toBe(expectedMessage);
 	});
 
-	it('returns Email already in use message when email is already in use', async () => {
+	it(`returns ${email_inuse} message when email is already in use`, async () => {
 		await User.create({ ...validUser });
 		const response = await postUser();
-		expect(response.body.validationErrors.email).toBe('Email already in use!');
+		expect(response.body.validationErrors.email).toBe(email_inuse);
 	});
 
 	it('returns errors when both username is null and the email is already in use', async () => {
