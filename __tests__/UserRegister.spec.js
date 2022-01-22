@@ -1,9 +1,11 @@
 const supertest = require('supertest');
+const nodemailerStub = require('nodemailer-stub');
 
 const app = require('../src/app');
 
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
+const EmailService = require('../src/email/EmailService');
 
 beforeAll(() => {
 	return sequelize.sync();
@@ -30,7 +32,7 @@ const postUser = (user = validUser, options = {}) => {
 	return agent.send(user);
 };
 
-describe('Test user registration functionality', () => {
+describe('+++ Test user registration functionality +++', () => {
 	it('return 200 when signup request is valid', async () => {
 		const response = await postUser();
 		expect(response.status).toBe(200);
@@ -116,6 +118,7 @@ describe('Test user registration functionality', () => {
 	const password_null = 'Password cannot be null!';
 	const password_size = 'Must have min 8 and max 16 characters!';
 	const password_pattern = 'Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!';
+	// const email_failure = 'Email failure!';
 
 	// Second form of each
 	it.each`
@@ -164,7 +167,6 @@ describe('Test user registration functionality', () => {
 		});
 
 		const body = response.body;
-		console.log(body.validationErrors);
 		expect(Object.keys(body.validationErrors)).toEqual(['username', 'email']);
 	});
 
@@ -187,10 +189,49 @@ describe('Test user registration functionality', () => {
 		await postUser();
 		const users = await User.findAll();
 		const savedUser = users[0];
-		console.log(savedUser.activationToken);
 		expect(savedUser.activationToken).toBeTruthy();
 	});
-describe('Internationalization', () => {
+
+	it('sends and Account activation email with activationToken', async () => {
+		await postUser();
+		const lastMail = nodemailerStub.interactsWithMail.lastMail();
+		expect(lastMail.to).toContain(validUser.email);
+
+		const users = await User.findAll();
+		const savedUser = users[0];
+		expect(lastMail.content).toContain(savedUser.activationToken);
+	});
+
+	it('returns 502 Bad Gateway when sending activation email fails', async () => {
+		const mockedSendAccountActivationEmail = jest
+			.spyOn(EmailService, 'sendAccountActivationEmail')
+			.mockRejectedValue({ message: 'Failed to deliver email' });
+		const response = await postUser();
+		expect(response.status).toBe(502);
+		mockedSendAccountActivationEmail.mockRestore();
+	});
+
+	it('returns Email failure when sending activation email fails', async () => {
+		const mockedSendAccountActivationEmail = jest
+			.spyOn(EmailService, 'sendAccountActivationEmail')
+			.mockRejectedValue({ message: 'Failed to deliver email' });
+		const response = await postUser();
+		mockedSendAccountActivationEmail.mockRestore();
+		expect(response.body.message).toBe('Email Failure!');
+	});
+
+	it('does not save user to the database if sending activation email fails', async () => {
+		const mockedSendAccountActivationEmail = jest
+			.spyOn(EmailService, 'sendAccountActivationEmail')
+			.mockRejectedValue({ message: 'Failed to deliver email' });
+		await postUser();
+		mockedSendAccountActivationEmail.mockRestore();
+		const users = await User.findAll();
+		expect(users.length).toBe(0);
+	});
+});
+
+describe('+++ Test internationalization functionality +++', () => {
 	const username_null = 'Потребителското име не може да е празно!';
 	const username_size = 'Дължината на потребителското име трябва да е между 4 и 32 символа';
 	const email_null = 'Електронната поща не може да е празна!';
@@ -199,6 +240,7 @@ describe('Internationalization', () => {
 	const password_null = 'Паролата не може да е празна!';
 	const password_size = 'Дължината на паролата трябва да е между 8 и 16 символа!';
 	const password_pattern = 'Паролата трябва да съдържа поне 1 главна буква, 1 малка буква и 1 цифра!';
+	const email_failure = 'Писмото не е изпратено!';
 
 	const user_created = 'Потребителят е създаден успешно!';
 
@@ -234,7 +276,7 @@ describe('Internationalization', () => {
 		expect(body.validationErrors[field]).toBe(expectedMessage);
 	});
 
-	it(`returns ${email_inuse} message when email is already in use when selected language is BG`, async () => {
+	it(`returns ${email_inuse} message when email is already in use when selected language is set to BG`, async () => {
 		await User.create({ ...validUser });
 		const response = await postUser(validUser, { language: 'bg' });
 		expect(response.body.validationErrors.email).toBe(email_inuse);
@@ -243,5 +285,15 @@ describe('Internationalization', () => {
 	it(`return ${user_created} when signup request is valid`, async () => {
 		const response = await postUser(validUser, { language: 'bg' });
 		expect(response.body.message).toBe(user_created);
+	});
+
+	it(`returns ${email_failure} message when sending activation email fails and the language is set to BG`, async () => {
+		const mockedSendAccountActivationEmail = jest
+			.spyOn(EmailService, 'sendAccountActivationEmail')
+			.mockRejectedValue({ message: 'Failed to deliver email' });
+		const response = await postUser({ ...validUser }, { language: 'bg' });
+		console.log(response.body.message);
+		mockedSendAccountActivationEmail.mockRestore();
+		expect(response.body.message).toBe(email_failure);
 	});
 });
