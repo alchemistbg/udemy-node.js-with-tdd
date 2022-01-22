@@ -1,0 +1,11 @@
+{
+	"user_created": "User created",
+	"username_null": "Username cannot be null!",
+	"username_size": "Must have min 4 and max 32 characters!",
+	"email_null": "Email cannot be null!",
+	"email_invalid": "Email must be a valid email!",
+	"email_inuse": "Email already in use!",
+	"password_null": "Password cannot be null!",
+	"password_size": "Must have min 8 and max 16 characters!",
+	"password_pattern": "Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!"
+}
