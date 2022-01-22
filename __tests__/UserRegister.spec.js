@@ -22,8 +22,12 @@ const validUser = {
 	password: 'P4ssword',
 };
 
-const postUser = (user = validUser) => {
-	return supertest(app).post('/api/1.0/users').send(user);
+const postUser = (user = validUser, options = {}) => {
+	const agent = supertest(app).post('/api/1.0/users');
+	if (options.language) {
+		agent.set('Accept-Language', options.language);
+	}
+	return agent.send(user);
 };
 
 describe('Test user registration functionality', () => {
