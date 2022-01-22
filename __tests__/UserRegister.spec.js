@@ -154,4 +154,58 @@ describe('Test user registration functionality', () => {
 		console.log(body.validationErrors);
 		expect(Object.keys(body.validationErrors)).toEqual(['username', 'email']);
 	});
+describe('Internationalization', () => {
+	const username_null = 'Потребителското име не може да е празно!';
+	const username_size = 'Дължината на потребителското име трябва да е между 4 и 32 символа';
+	const email_null = 'Електронната поща не може да е празна!';
+	const email_invalid = 'Електронната поща трябва да е валидна!';
+	const email_inuse = 'Електронната поща вече е регистрирана!';
+	const password_null = 'Паролата не може да е празна!';
+	const password_size = 'Дължината на паролата трябва да е между 8 и 16 символа!';
+	const password_pattern = 'Паролата трябва да съдържа поне 1 главна буква, 1 малка буква и 1 цифра!';
+
+	const user_created = 'Потребителят е създаден успешно!';
+
+	// Second form of each
+	it.each`
+		field         | value               | expectedMessage
+		${'username'} | ${null}             | ${username_null}
+		${'username'} | ${'usr'}            | ${username_size}
+		${'username'} | ${'u'.repeat(33)}   | ${username_size}
+		${'email'}    | ${null}             | ${email_null}
+		${'email'}    | ${'mail.com'}       | ${email_invalid}
+		${'email'}    | ${'user1.mail.com'} | ${email_invalid}
+		${'email'}    | ${'user1@mail'}     | ${email_invalid}
+		${'password'} | ${null}             | ${password_null}
+		${'password'} | ${'P4sswor'}        | ${password_size}
+		${'password'} | ${'p'.repeat(17)}   | ${password_size}
+		${'password'} | ${'alllowercase'}   | ${password_pattern}
+		${'password'} | ${'ALLUPPERCASE'}   | ${password_pattern}
+		${'password'} | ${'123456789'}      | ${password_pattern}
+		${'password'} | ${'lowerUPPER'}     | ${password_pattern}
+		${'password'} | ${'lower4nd5678'}   | ${password_pattern}
+		${'password'} | ${'UPPER1234567'}   | ${password_pattern}
+	`('returns $expectedMessage when $field is $value when selected language is BG', async ({ field, value, expectedMessage }) => {
+		const user = {
+			username: 'user1',
+			email: 'user1@email.com',
+			password: 'P4ssword',
+		};
+
+		user[field] = value;
+		const response = await postUser(user, { language: 'bg' });
+		const body = response.body;
+		expect(body.validationErrors[field]).toBe(expectedMessage);
+	});
+
+	it(`returns ${email_inuse} message when email is already in use when selected language is BG`, async () => {
+		await User.create({ ...validUser });
+		const response = await postUser(validUser, { language: 'bg' });
+		expect(response.body.validationErrors.email).toBe(email_inuse);
+	});
+
+	it(`return ${user_created} when signup request is valid`, async () => {
+		const response = await postUser(validUser, { language: 'bg' });
+		expect(response.body.message).toBe(user_created);
+	});
 });
