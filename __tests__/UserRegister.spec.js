@@ -1,5 +1,6 @@
 const supertest = require('supertest');
-const nodemailerStub = require('nodemailer-stub');
+// const nodemailerStub = require('nodemailer-stub');
+const { SMTPServer } = require('smtp-server');
 
 const app = require('../src/app');
 
@@ -193,13 +194,31 @@ describe('+++ Test user registration functionality +++', () => {
 	});
 
 	it('sends and Account activation email with activationToken', async () => {
+		let lastMail;
+		const server = new SMTPServer({
+			authOptional: true,
+			onData(stream, session, callback) {
+				let mailBody;
+				stream.on('data', (data) => {
+					mailBody += data.toString();
+				});
+				stream.on('end', () => {
+					lastMail = mailBody;
+					callback();
+				});
+			}
+		});
+
+		await server.listen(8587, 'localhost');
+
 		await postUser();
-		const lastMail = nodemailerStub.interactsWithMail.lastMail();
-		expect(lastMail.to).toContain(validUser.email);
+
+		await server.close();
 
 		const users = await User.findAll();
 		const savedUser = users[0];
-		expect(lastMail.content).toContain(savedUser.activationToken);
+		expect(lastMail).toContain(validUser.email);
+		expect(lastMail).toContain(savedUser.activationToken);
 	});
 
 	it('returns 502 Bad Gateway when sending activation email fails', async () => {
