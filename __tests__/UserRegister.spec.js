@@ -194,27 +194,7 @@ describe('+++ Test user registration functionality +++', () => {
 	});
 
 	it('sends and Account activation email with activationToken', async () => {
-		let lastMail;
-		const server = new SMTPServer({
-			authOptional: true,
-			onData(stream, session, callback) {
-				let mailBody;
-				stream.on('data', (data) => {
-					mailBody += data.toString();
-				});
-				stream.on('end', () => {
-					lastMail = mailBody;
-					callback();
-				});
-			}
-		});
-
-		await server.listen(8587, 'localhost');
-
 		await postUser();
-
-		await server.close();
-
 		const users = await User.findAll();
 		const savedUser = users[0];
 		expect(lastMail).toContain(validUser.email);
@@ -222,29 +202,20 @@ describe('+++ Test user registration functionality +++', () => {
 	});
 
 	it('returns 502 Bad Gateway when sending activation email fails', async () => {
-		const mockedSendAccountActivationEmail = jest
-			.spyOn(EmailService, 'sendAccountActivationEmail')
-			.mockRejectedValue({ message: 'Failed to deliver email' });
+		simulateSmtpFailure = true;
 		const response = await postUser();
 		expect(response.status).toBe(502);
-		mockedSendAccountActivationEmail.mockRestore();
 	});
 
 	it('returns Email failure when sending activation email fails', async () => {
-		const mockedSendAccountActivationEmail = jest
-			.spyOn(EmailService, 'sendAccountActivationEmail')
-			.mockRejectedValue({ message: 'Failed to deliver email' });
+		simulateSmtpFailure = true;
 		const response = await postUser();
-		mockedSendAccountActivationEmail.mockRestore();
 		expect(response.body.message).toBe('Email Failure!');
 	});
-
+	
 	it('does not save user to the database if sending activation email fails', async () => {
-		const mockedSendAccountActivationEmail = jest
-			.spyOn(EmailService, 'sendAccountActivationEmail')
-			.mockRejectedValue({ message: 'Failed to deliver email' });
+		simulateSmtpFailure = true;
 		await postUser();
-		mockedSendAccountActivationEmail.mockRestore();
 		const users = await User.findAll();
 		expect(users.length).toBe(0);
 	});
