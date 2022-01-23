@@ -6,17 +6,45 @@ const app = require('../src/app');
 
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
-const EmailService = require('../src/email/EmailService');
 
-beforeAll(() => {
-	return sequelize.sync();
+let lastMail, server;
+let simulateSmtpFailure = false;
+
+beforeAll(async () => {
+	server = new SMTPServer({
+		authOptional: true,
+		onData(stream, session, callback) {
+			let mailBody;
+			stream.on('data', (data) => {
+				mailBody += data.toString();
+			});
+			stream.on('end', () => {
+				if (simulateSmtpFailure) {
+					const error = new Error('Invalid mailbox');
+					error.responseCode = 553;
+					return callback(error);
+				}
+				lastMail = mailBody;
+				callback();
+			});
+		},
+	});
+	await server.listen(8587, 'localhost');
+
+	await sequelize.sync();
 });
 
 beforeEach(() => {
+	simulateSmtpFailure = false;
+
 	return User.destroy({
 		truncate: true,
 		restartIdentity: true,
 	});
+});
+
+afterAll(async () => {
+	await server.close();
 });
 
 const validUser = {
