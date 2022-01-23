@@ -6,5 +6,13 @@
 		"dialect": "sqlite",
 		"storage": "./database-dev.sqlite",
 		"logging": false
+	},
+	"mail": {
+		"host": "smtp.ethereal.email",
+		"port": 587,
+		"auth": {
+			"user": "zoila.kuhic73@ethereal.email",
+			"pass": "nXGaVXMsMwt1TKqQM7"
+    	}
 	}
 }
