@@ -1,5 +1,4 @@
 const supertest = require('supertest');
-// const nodemailerStub = require('nodemailer-stub');
 const { SMTPServer } = require('smtp-server');
 
 const app = require('../src/app');
@@ -240,7 +239,7 @@ describe('+++ Test user registration functionality +++', () => {
 		const response = await postUser();
 		expect(response.body.message).toBe('Email Failure!');
 	});
-	
+
 	it('does not save user to the database if sending activation email fails', async () => {
 		simulateSmtpFailure = true;
 		await postUser();
@@ -354,18 +353,21 @@ describe('+++ Test internationalization functionality +++', () => {
 		${'password'} | ${'lowerUPPER'}     | ${password_pattern}
 		${'password'} | ${'lower4nd5678'}   | ${password_pattern}
 		${'password'} | ${'UPPER1234567'}   | ${password_pattern}
-	`('returns $expectedMessage when $field is $value when selected language is BG', async ({ field, value, expectedMessage }) => {
-		const user = {
-			username: 'user1',
-			email: 'user1@email.com',
-			password: 'P4ssword',
-		};
+	`(
+		'returns $expectedMessage when $field is $value when selected language is BG',
+		async ({ field, value, expectedMessage }) => {
+			const user = {
+				username: 'user1',
+				email: 'user1@email.com',
+				password: 'P4ssword',
+			};
 
-		user[field] = value;
-		const response = await postUser(user, { language: 'bg' });
-		const body = response.body;
-		expect(body.validationErrors[field]).toBe(expectedMessage);
-	});
+			user[field] = value;
+			const response = await postUser(user, { language: 'bg' });
+			const body = response.body;
+			expect(body.validationErrors[field]).toBe(expectedMessage);
+		}
+	);
 
 	it(`returns ${email_inuse} message when email is already in use when selected language is set to BG`, async () => {
 		await User.create({ ...validUser });
@@ -379,12 +381,9 @@ describe('+++ Test internationalization functionality +++', () => {
 	});
 
 	it(`returns ${email_failure} message when sending activation email fails and the language is set to BG`, async () => {
-		const mockedSendAccountActivationEmail = jest
-			.spyOn(EmailService, 'sendAccountActivationEmail')
-			.mockRejectedValue({ message: 'Failed to deliver email' });
+		simulateSmtpFailure = true;
 		const response = await postUser({ ...validUser }, { language: 'bg' });
 		console.log(response.body.message);
-		mockedSendAccountActivationEmail.mockRestore();
 		expect(response.body.message).toBe(email_failure);
 	});
 });
