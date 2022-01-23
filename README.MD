@@ -1,6 +1,9 @@
 # Udemy - Node.js with Test-Driven Development
 
 ## Some notes
+Client application can be started using the following command:
+
+    npx http-server -c-1 -p 8080 -P http://localhost:3000
 
 ### ESLint
 Some advices for setting-up eslint with prettier can be found [here](https://stackoverflow.com/questions/53516594/why-do-i-keep-getting-delete-cr-prettier-prettier).
