@@ -75,5 +75,11 @@
 		"endOfLine": "lf",
 		"tabWidth": 4,
 		"useTabs": true
+	},
+	"jest": {
+		"watchPlugins": [
+			"jest-watch-typeahead/filename",
+			"jest-watch-typeahead/testname"
+		]
 	}
 }
