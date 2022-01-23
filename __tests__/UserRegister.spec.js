@@ -221,6 +221,79 @@ describe('+++ Test user registration functionality +++', () => {
 	});
 });
 
+describe('+++ Test user account activation +++', () => {
+	it('activates user account if correct token is sent', async () => {
+		await postUser();
+		let users = await User.findAll();
+		const user = users[0];
+		const token = user.activationToken;
+
+		await supertest(app).post(`/api/1.0/users/activation/${token}`).send();
+
+		users = await User.findAll();
+		const activatedUser = users[0];
+		expect(activatedUser.inactive).toBe(false);
+	});
+
+	it('removes the token after successful activation', async () => {
+		await postUser();
+		let users = await User.findAll();
+		const user = users[0];
+		const token = user.activationToken;
+
+		await supertest(app).post(`/api/1.0/users/activation/${token}`).send();
+
+		users = await User.findAll();
+		const activatedUser = users[0];
+		expect(activatedUser.activationToken).toBeFalsy();
+	});
+
+	it('does not activate the account when token is wrong', async () => {
+		await postUser();
+		const token = 'this-is-nonexisting-token';
+
+		await supertest(app).post(`/api/1.0/users/activation/${token}`).send();
+
+		const users = await User.findAll();
+		const activatedUser = users[0];
+		expect(activatedUser.inactive).toBe(true);
+	});
+
+	it('return Bad request when token is wrong', async () => {
+		await postUser();
+		const token = 'this-is-nonexistent-token';
+
+		const response = await supertest(app).post(`/api/1.0/users/activation/${token}`).send();
+
+		expect(response.status).toBe(400);
+	});
+
+	it.each`
+		language | tokenStatus  | message
+		${'en'}  | ${'wrong'}   | ${'This account is either active or the token is invalid!'}
+		${'bg'}  | ${'wrong'}   | ${'Този профил вече е активиран или токена е невалиден!'}
+		${'en'}  | ${'correct'} | ${'The account was successfully activated!'}
+		${'bg'}  | ${'correct'} | ${'Профилът беше активиран успешно!'}
+	`(
+		'returns $message when $tokenStatus token is sent and the language is $language',
+		async ({ language, tokenStatus, message }) => {
+			await postUser();
+			let token = 'this-is-nonexistent-token';
+			if (tokenStatus === 'correct') {
+				const users = await User.findAll();
+				const user = users[0];
+				token = user.activationToken;
+			}
+
+			const response = await supertest(app)
+				.post(`/api/1.0/users/activation/${token}`)
+				.set('Accept-Language', language)
+				.send();
+			expect(response.body.message).toBe(message);
+		}
+	);
+});
+
 describe('+++ Test internationalization functionality +++', () => {
 	const username_null = 'Потребителското име не може да е празно!';
 	const username_size = 'Дължината на потребителското име трябва да е между 4 и 32 символа';
