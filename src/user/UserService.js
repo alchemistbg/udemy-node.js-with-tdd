@@ -36,6 +36,15 @@ const save = async (body) => {
 		throw new EmailException();
 	}
 };
+
+const activateUser = async (token) => {
+	const user = await User.findOne({ where: { activationToken: token } });
+	if (!user) {
+		throw new InvalidTokenException();
+	}
+	user.inactive = false;
+	user.activationToken = null;
+	await user.save();
 };
 
 const findByEmail = async (email) => {
