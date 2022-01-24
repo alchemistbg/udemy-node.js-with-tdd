@@ -47,7 +47,7 @@ const activateUser = async (token) => {
 	await user.save();
 };
 
-const findByEmail = async (email) => {
+const findUserByEmail = async (email) => {
 	return await User.findOne({ where: { email: email } });
 };
 
