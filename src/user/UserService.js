@@ -1,14 +1,18 @@
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const sequelize = require('../config/database');
 
 const User = require('./User');
+const EmailService = require('../email/EmailService');
+const EmailException = require('../email/EmailException');
+const InvalidTokenException = require('./InvalidTokenException');
 
 const generateToken = (length) => {
 	// return crypto.randomBytes(length).toString('hex');
 	return crypto.randomBytes(length).toString('hex').substring(0, length);
-}
+};
 
-const save = async (body) => {
+const saveUser = async (body) => {
 	const { username, email, password } = body;
 	const hash = await bcrypt.hash(password, 10);
 	// First way to create user object
@@ -52,6 +56,7 @@ const findUserByEmail = async (email) => {
 };
 
 module.exports = {
-	save,
-	findByEmail,
+	saveUser,
+	activateUser,
+	findUserByEmail,
 };
