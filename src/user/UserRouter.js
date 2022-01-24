@@ -48,4 +48,15 @@ router.post(
 	}
 );
 
+// The path is also changed on the frontend. Must be done if the REST API endpoints will be different!
+router.post('/activation/:token', async (req, res) => {
+	const { token } = req.params;
+	try {
+		await UserService.activateUser(token); 
+	} catch (error) {
+		return res.status(400).send({ message: req.t(error.message) });
+	}
+	res.status(200).send({ message: req.t('account_activation_success') });
+});
+
 module.exports = router;
