@@ -26,7 +26,16 @@ const save = async (body) => {
 	// 	password: hash,
 	// });
 
-	await User.create(user);
+	const transaction = await sequelize.transaction();
+	await User.create(user, { transaction });
+	try {
+		await EmailService.sendAccountActivationEmail(user.email, user.activationToken);
+		await transaction.commit();
+	} catch (error) {
+		await transaction.rollback();
+		throw new EmailException();
+	}
+};
 };
 
 const findByEmail = async (email) => {
