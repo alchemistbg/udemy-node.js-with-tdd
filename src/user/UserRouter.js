@@ -15,7 +15,7 @@ router.post(
 		.withMessage('email_invalid')
 		.bail()
 		.custom(async (email) => {
-			const user = await UserService.findByEmail(email);
+			const user = await UserService.findUserByEmail(email);
 			if (user) {
 				throw new Error('email_inuse');
 			}
