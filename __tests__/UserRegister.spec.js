@@ -93,30 +93,18 @@ describe('+++ Test user registration functionality +++', () => {
 	});
 
 	it('returns 400 when username is null', async () => {
-		const response = await postUser({
-			username: null,
-			email: 'user1@mail.com',
-			password: 'P4ssword',
-		});
+		const response = await postUser({ ...validUser, username: null });
 		expect(response.status).toBe(400);
 	});
 
 	it('returns validationErrors field in the response body when validation error occurs', async () => {
-		const response = await postUser({
-			username: null,
-			email: 'user1@mail.com',
-			password: 'P4ssword',
-		});
+		const response = await postUser({ ...validUser, username: null });
 		const body = response.body;
 		expect(body.validationErrors).not.toBeUndefined();
 	});
 
 	it('returns errors when both username and email are null', async () => {
-		const response = await postUser({
-			username: null,
-			email: null,
-			password: 'P4ssword',
-		});
+		const response = await postUser({ ...validUser, username: null, email: null });
 		const body = response.body;
 		expect(Object.keys(body.validationErrors)).toEqual(['username', 'email']);
 	});
@@ -237,7 +225,7 @@ describe('+++ Test user registration functionality +++', () => {
 	it('returns Email failure when sending activation email fails', async () => {
 		simulateSmtpFailure = true;
 		const response = await postUser();
-		expect(response.body.message).toBe('Email Failure!');
+		expect(response.body.message).toBe('Email failure!');
 	});
 
 	it('does not save user to the database if sending activation email fails', async () => {
