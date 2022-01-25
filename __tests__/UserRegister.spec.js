@@ -246,6 +246,13 @@ describe('+++ Test user registration functionality +++', () => {
 		const users = await User.findAll();
 		expect(users.length).toBe(0);
 	});
+
+	it('returns validation failure message when validation error occurs ', async () => {
+		const response = await postUser({ ...validUser, username: null });
+		expect(response.body.message).toBe('Validation failure!');
+	});
+});
+
 describe('+++ Test error object +++', () => {
 	it('returns path, timestamp, message and validation errors if validation failure occurs', async () => {
 		const response = await postUser({ ...validUser, username: null });
@@ -357,6 +364,7 @@ describe('+++ Test internationalization functionality +++', () => {
 	const password_size = 'Дължината на паролата трябва да е между 8 и 16 символа!';
 	const password_pattern = 'Паролата трябва да съдържа поне 1 главна буква, 1 малка буква и 1 цифра!';
 	const email_failure = 'Писмото не е изпратено!';
+	const validation_failure = 'Грешка при валидирането на данните!';
 
 	const user_created = 'Потребителят е създаден успешно!';
 
@@ -411,5 +419,10 @@ describe('+++ Test internationalization functionality +++', () => {
 		const response = await postUser({ ...validUser }, { language: 'bg' });
 		console.log(response.body.message);
 		expect(response.body.message).toBe(email_failure);
+	});
+
+	it(`returns ${validation_failure} message when validation error occurs `, async () => {
+		const response = await postUser({ ...validUser, username: null }, { language: 'bg' });
+		expect(response.body.message).toBe(validation_failure);
 	});
 });
