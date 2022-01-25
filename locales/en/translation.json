@@ -5,10 +5,11 @@
 	"email_null": "Email cannot be null!",
 	"email_invalid": "Email must be a valid email!",
 	"email_inuse": "Email already in use!",
-	"email_failure": "Email Failure!",
+	"email_failure": "Email failure!",
 	"password_null": "Password cannot be null!",
 	"password_size": "Must have min 8 and max 16 characters!",
 	"password_pattern": "Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!",
 	"account_activation_failure": "This account is either active or the token is invalid!",
-	"account_activation_success": "The account was successfully activated!"
+	"account_activation_success": "The account was successfully activated!",
+	"validation_failure": "Validation failure!"
 }
