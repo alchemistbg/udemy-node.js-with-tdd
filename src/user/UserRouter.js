@@ -2,6 +2,8 @@ const express = require('express');
 const { check, validationResult } = require('express-validator');
 
 const UserService = require('./UserService');
+const ValidationException = require('../error/ValidationException');
+
 const router = express.Router();
 
 router.post(
@@ -29,34 +31,30 @@ router.post(
 		.bail()
 		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).*$/)
 		.withMessage('password_pattern'),
-	async (req, res) => {
-		// console.log(req.headers['accept-language']);
+	async (req, res, next) => {
 		const errors = validationResult(req);
+		// console.log(errors);
 		if (!errors.isEmpty()) {
-			const validationErrors = {};
-			errors.array().forEach((error) => {
-				return (validationErrors[error.param] = req.t(error.msg));
-			});
-			return res.status(400).send({ validationErrors: validationErrors });
+			return next(new ValidationException(errors.array()));
 		}
 		try {
 			await UserService.saveUser(req.body);
 			return res.status(200).send({ message: req.t('user_created') });
 		} catch (error) {
-			return res.status(502).send({ message: req.t(error.message) });
+			next(error);
 		}
 	}
 );
 
 // The path is also changed on the frontend. Must be done if the REST API endpoints will be different!
-router.post('/activation/:token', async (req, res) => {
+router.post('/activation/:token', async (req, res, next) => {
 	const { token } = req.params;
 	try {
 		await UserService.activateUser(token); 
+		return res.status(200).send({ message: req.t('account_activation_success') });
 	} catch (error) {
-		return res.status(400).send({ message: req.t(error.message) });
+		next(error);
 	}
-	res.status(200).send({ message: req.t('account_activation_success') });
 });
 
 module.exports = router;
