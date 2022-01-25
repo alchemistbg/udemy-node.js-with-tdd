@@ -246,6 +246,32 @@ describe('+++ Test user registration functionality +++', () => {
 		const users = await User.findAll();
 		expect(users.length).toBe(0);
 	});
+describe('+++ Test error object +++', () => {
+	it('returns path, timestamp, message and validation errors if validation failure occurs', async () => {
+		const response = await postUser({ ...validUser, username: null });
+		expect(Object.keys(response.body)).toEqual(['path', 'timestamp', 'message', 'validationErrors']);
+	});
+
+	it('returns path, timestamp and message when request fails and no validation failure occurs', async () => {
+		const token = 'this-is-nonexisting-token';
+		const response = await supertest(app).post(`/api/1.0/users/activation/${token}`).send();
+		expect(Object.keys(response.body)).toEqual(['path', 'timestamp', 'message']);
+	});
+
+	it('returns path in error body', async () => {
+		const token = 'this-is-nonexisting-token';
+		const response = await supertest(app).post(`/api/1.0/users/activation/${token}`).send();
+		expect(response.body.path).toEqual(`/api/1.0/users/activation/${token}`);
+	});
+
+	it('returns timestamp in milliseconds within 5 seconds in error body', async () => {
+		const nowMillis = new Date().getTime();
+		const nowMillisAfterFiveSeconds = nowMillis + 5 * 1000;
+		const token = 'this-is-nonexisting-token';
+		const response = await supertest(app).post(`/api/1.0/users/activation/${token}`).send();
+		expect(response.body.timestamp).toBeGreaterThan(nowMillis);
+		expect(response.body.timestamp).toBeLessThan(nowMillisAfterFiveSeconds);
+	});
 });
 
 describe('+++ Test user account activation +++', () => {
