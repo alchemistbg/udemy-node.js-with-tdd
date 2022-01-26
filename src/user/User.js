@@ -5,6 +5,7 @@ const Model = Sequelize.Model;
 
 class User extends Model {}
 
+// TODO: Need to make password required! The backend do password validation but database don't!
 User.init(
 	{
 		username: {
