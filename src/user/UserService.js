@@ -55,8 +55,30 @@ const findUserByEmail = async (email) => {
 	return await User.findOne({ where: { email: email } });
 };
 
+const getUsers = async (page) => {
+	// TODO: change the function for 1-base pagination
+	const size = 10;
+
+	const usersWithCount = await User.findAndCountAll({
+		where: { inactive: false },
+		attributes: ['id', 'username', 'email'],
+		limit: size,
+		offset: page * size,
+	});
+
+	const totalPages = Math.ceil(usersWithCount.count / size);
+
+	return {
+		totalPages: totalPages,
+		currentPage: page,
+		pageSize: size,
+		users: usersWithCount.rows,
+	};
+};
+
 module.exports = {
 	saveUser,
 	activateUser,
 	findUserByEmail,
+	getUsers,
 };
