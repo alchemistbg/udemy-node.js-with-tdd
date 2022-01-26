@@ -8,7 +8,12 @@ const router = express.Router();
 
 router.post(
 	'/',
-	check('username').notEmpty().withMessage('username_null').bail().isLength({ min: 4, max: 32 }).withMessage('username_size'),
+	check('username')
+		.notEmpty()
+		.withMessage('username_null')
+		.bail()
+		.isLength({ min: 4, max: 32 })
+		.withMessage('username_size'),
 	check('email')
 		.notEmpty()
 		.withMessage('email_null')
@@ -33,7 +38,6 @@ router.post(
 		.withMessage('password_pattern'),
 	async (req, res, next) => {
 		const errors = validationResult(req);
-		// console.log(errors);
 		if (!errors.isEmpty()) {
 			return next(new ValidationException(errors.array()));
 		}
