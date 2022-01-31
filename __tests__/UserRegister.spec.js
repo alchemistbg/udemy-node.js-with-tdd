@@ -33,10 +33,10 @@ beforeAll(async () => {
 	await sequelize.sync();
 });
 
-beforeEach(() => {
+beforeEach(async () => {
 	simulateSmtpFailure = false;
 
-	return User.destroy({
+	await User.destroy({
 		truncate: true,
 		restartIdentity: true,
 	});
@@ -44,6 +44,8 @@ beforeEach(() => {
 
 afterAll(async () => {
 	await server.close();
+
+	jest.setTimeout(5000);
 });
 
 const validUser = {
