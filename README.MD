@@ -1,5 +1,8 @@
 # Udemy - Node.js with Test-Driven Development
 
+### TODO
+Instead of creating errors for every single case (e.g. Validation error, Authentication error and so on) a universal error could be created.
+
 ## Some notes
 Client application can be started using the following command:
 
