@@ -6,6 +6,20 @@ const app = require('../src/app');
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
 
+const validUser = {
+	username: 'user1',
+	email: 'user1@mail.com',
+	password: 'P4ssword',
+};
+
+const postUser = (user = validUser, options = {}) => {
+	const agent = supertest(app).post('/api/1.0/users');
+	if (options.language) {
+		agent.set('Accept-Language', options.language);
+	}
+	return agent.send(user);
+};
+
 let lastMail, server;
 let simulateSmtpFailure = false;
 
@@ -31,6 +45,8 @@ beforeAll(async () => {
 	await server.listen(8587, 'localhost');
 
 	await sequelize.sync();
+
+	jest.setTimeout(20000);
 });
 
 beforeEach(async () => {
