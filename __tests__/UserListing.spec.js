@@ -36,3 +36,12 @@ beforeEach(async () => {
 		restartIdentity: true,
 	});
 });
+
+describe('+++ Test listing users functionality +++', () => {
+	it('returns 200 OK when there are no users in the database', async () => {
+		const response = await supertest(app).get('/api/1.0/users');
+		expect(response.status).toBe(200);
+	});
+
+});
+
