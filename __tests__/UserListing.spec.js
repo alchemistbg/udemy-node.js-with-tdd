@@ -58,5 +58,19 @@ describe('+++ Test listing users functionality +++', () => {
 		const response = await getUsers();
 		expect(response.body.users.length).toBe(10);
 	});
+
+	it('returns 6 users in a single page when there are 6 active and 5 inactive in the database', async () => {
+		await addUsers(6, 5);
+		const response = await getUsers();
+		expect(response.body.users.length).toBe(6);
+	});
+
+	it('returns only id, username and email in users array', async () => {
+		await addUsers(6, 5);
+		const response = await getUsers();
+		const user = response.body.users[0];
+		expect(Object.keys(user)).toEqual(['id', 'username', 'email']);
+	});
+
 });
 
