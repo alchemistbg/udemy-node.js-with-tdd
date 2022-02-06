@@ -43,5 +43,20 @@ describe('+++ Test listing users functionality +++', () => {
 		expect(response.status).toBe(200);
 	});
 
+	it('returns page object as response body', async () => {
+		const response = await getUsers();
+		expect(response.body).toEqual({
+			totalPages: 0,
+			currentPage: 0,
+			pageSize: 10,
+			users: [],
+		});
+	});
+
+	it('returns 10 users in a single when there are 11 users in the database', async () => {
+		await addUsers(11);
+		const response = await getUsers();
+		expect(response.body.users.length).toBe(10);
+	});
 });
 
