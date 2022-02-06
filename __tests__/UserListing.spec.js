@@ -72,5 +72,21 @@ describe('+++ Test listing users functionality +++', () => {
 		expect(Object.keys(user)).toEqual(['id', 'username', 'email']);
 	});
 
+	it('return 2 as totalPages when there are 15 active and 7 inactive users', async () => {
+		await addUsers(15, 7);
+		const response = await getUsers();
+		expect(response.body.totalPages).toBe(2);
+	});
+
+	it('returns second page and page indicator when page is set as 1 in request parameter', async () => {
+		// TODO: change the test for 1-base pagination
+		await addUsers(11);
+
+		// const response = await supertest(app).get('/api/1.0/users?page=1');
+		const response = await getUsers().query({ page: 1 });
+		expect(response.body.currentPage).toBe(1);
+		expect(response.body.users[0].username).toBe('user11');
+	});
+
 });
 
