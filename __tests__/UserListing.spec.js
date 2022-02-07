@@ -110,5 +110,18 @@ describe('+++ Test listing users functionality +++', () => {
 		expect(response.body.pageSize).toBe(10);
 	});
 
+	it('returns 10 users and corresponding size indicator when the page size is set to 0 as request parameter', async () => {
+		await addUsers(11);
+		const response = await getUsers().query({ size: 0 });
+		expect(response.body.users.length).toBe(10);
+		expect(response.body.pageSize).toBe(10);
+	});
+
+	it('returns currentPage as 0 and pageSize as 10 when both are sat as NaN in the query', async () => {
+		await addUsers(11);
+		const response = await getUsers().query({ page: 'page', size: 'size' });
+		expect(response.body.currentPage).toBe(0);
+		expect(response.body.pageSize).toBe(10);
+	});
 });
 
