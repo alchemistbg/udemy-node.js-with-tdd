@@ -88,5 +88,12 @@ describe('+++ Test listing users functionality +++', () => {
 		expect(response.body.users[0].username).toBe('user11');
 	});
 
+	it('returns first page when the page is set below 0 as query parameter', async () => {
+		await addUsers(11);
+
+		// const response = await supertest(app).get('/api/1.0/users?page=1');
+		const response = await getUsers().query({ page: -51 });
+		expect(response.body.currentPage).toBe(0);
+	});
 });
 
