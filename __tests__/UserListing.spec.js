@@ -95,5 +95,13 @@ describe('+++ Test listing users functionality +++', () => {
 		const response = await getUsers().query({ page: -51 });
 		expect(response.body.currentPage).toBe(0);
 	});
+
+	it('returns 5 users and corresponding size indicator when the page size is set to 5 as request parameter', async () => {
+		await addUsers(11);
+		const response = await getUsers().query({ size: 5 });
+		expect(response.body.users.length).toBe(5);
+		expect(response.body.pageSize).toBe(5);
+	});
+
 });
 
