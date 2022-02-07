@@ -103,5 +103,12 @@ describe('+++ Test listing users functionality +++', () => {
 		expect(response.body.pageSize).toBe(5);
 	});
 
+	it('returns 10 users and corresponding size indicator when the page size is set to 1000 as request parameter', async () => {
+		await addUsers(11);
+		const response = await getUsers().query({ size: 1000 });
+		expect(response.body.users.length).toBe(10);
+		expect(response.body.pageSize).toBe(10);
+	});
+
 });
 
