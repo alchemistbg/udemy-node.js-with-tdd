@@ -67,6 +67,17 @@ router.get('/', pagination, async (req, res) => {
 	const users = await UserService.getUsers(currPage, pageSize);
 	res.status(200).send(users);
 });
+
+router.get('/:userId', async (req, res, next) => {
+	const { userId } = req.params;
+	try {
+		const user = await UserService.getUser(userId);
+		res.status(200).send(user);
+	} catch (error) {
+		next(error);
+	}
+});
+
 	}
 	const users = await UserService.getUsers(page);
 	res.status(200).send(users);
