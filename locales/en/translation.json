@@ -11,5 +11,9 @@
 	"password_pattern": "Password must have at least 1 uppercase, 1 lowercase letter as well as 1 number!",
 	"account_activation_failure": "This account is either active or the token is invalid!",
 	"account_activation_success": "The account was successfully activated!",
-	"validation_failure": "Validation failure!"
+	"validation_failure": "Validation failure!",
+	"user_not_found": "User not found!",
+	"auth_failure": "Incorrect credentials!",
+	"inactive_auth_failure": "Account is not active!",
+	"unauthorized_user_update": "Not authorized! - FUCK!!!"
 }
