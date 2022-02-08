@@ -74,6 +74,20 @@ const getUsers = async (currentPage, pageSize) => {
 	};
 };
 
+const getUser = async (userId) => {
+	const user = await User.findOne({
+		where: {
+			id: userId,
+			inactive: false,
+		},
+		attributes: ['id', 'username', 'email'],
+	});
+	if (!user) {
+		throw new UserNotFoundException();
+	}
+	return user;
+};
+
 module.exports = {
 	saveUser,
 	activateUser,
