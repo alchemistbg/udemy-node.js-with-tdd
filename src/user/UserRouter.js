@@ -61,10 +61,12 @@ router.post('/activation/:token', async (req, res, next) => {
 	}
 });
 
-router.get('/', async (req, res) => {
-	let page = req.query.page ? +req.query.page : 0;
-	if (page < 0) {
-		page = 0;
+router.get('/', pagination, async (req, res) => {
+	const { currPage, pageSize } = req.pagination;
+
+	const users = await UserService.getUsers(currPage, pageSize);
+	res.status(200).send(users);
+});
 	}
 	const users = await UserService.getUsers(page);
 	res.status(200).send(users);
