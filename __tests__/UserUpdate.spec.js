@@ -46,3 +46,10 @@ beforeAll(async () => {
 beforeEach(async () => {
 	await User.destroy({ truncate: true });
 });
+
+describe('+++ Testing user update +++', () => {
+	it('returns forbidden when the request is sent without authorization ', async () => {
+		const response = await putUser();
+		expect(response.status).toBe(403);
+	});
+});
