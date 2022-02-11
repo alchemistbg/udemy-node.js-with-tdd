@@ -69,4 +69,37 @@ describe('+++ Testing user update +++', () => {
 		}
 	);
 
+	it('returns 403 when request is sent with incorrect email in base64 authorization', async () => {
+		await addUser();
+		const response = await putUser(5, null, {
+			auth: { email: activeUser.email, password: activeUser.password },
+		});
+		expect(response.status).toBe(403);
+	});
+
+	it('returns 403 when request is sent with incorrect password in base64 authorization', async () => {
+		await addUser();
+		const response = await putUser(5, null, {
+			auth: { email: activeUser.email, password: activeUser.password },
+		});
+		expect(response.status).toBe(403);
+	});
+
+	it('returns 403 when request is sent with correct correct credentials but for another user', async () => {
+		await addUser();
+		const userToBeUpdated = await addUser({ ...activeUser, username: 'user2', email: 'user2@mail.com' });
+
+		const response = await putUser(userToBeUpdated.id, null, {
+			auth: { email: activeUser.email, password: activeUser.password },
+		});
+		expect(response.status).toBe(403);
+	});
+
+	it('returns 403 when request is sent by inactive user with correct credentials', async () => {
+		const inactiveUser = await addUser({ ...activeUser, inactive: true });
+		const response = await putUser(inactiveUser.id, null, {
+			auth: { email: inactiveUser.email, password: inactiveUser.password },
+		});
+		expect(response.status).toBe(403);
+	});
 });
