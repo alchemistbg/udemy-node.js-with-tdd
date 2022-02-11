@@ -52,4 +52,21 @@ describe('+++ Testing user update +++', () => {
 		const response = await putUser();
 		expect(response.status).toBe(403);
 	});
+
+	it.each`
+		language | message
+		${'en'}  | ${en.unauthorized_user_update}
+		${'bg'}  | ${bg.unauthorized_user_update}
+	`(
+		'returns error body with $message for unauthorized request when the language is set to $language',
+		async ({ language, message }) => {
+			const nowInMillis = new Date().getTime();
+			// const response = await supertest(app).put('/api/1.0/users/5').set('Accept-Language', language).send();
+			const response = await putUser(5, null, { language });
+			expect(response.body.path).toBe('/api/1.0/users/5');
+			expect(response.body.message).toBe(message);
+			expect(response.body.timestamp).toBeGreaterThan(nowInMillis);
+		}
+	);
+
 });
