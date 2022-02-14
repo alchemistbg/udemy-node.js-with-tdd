@@ -78,9 +78,35 @@ router.get('/:userId', async (req, res, next) => {
 	}
 });
 
+router.put('/:userId', async (req, res, next) => {
+	const { authorization } = req.headers;
+	if (authorization) {
+		const encodedAuthData = authorization.substring(6);
+		const decodedAuthData = Buffer.from(encodedAuthData, 'base64').toString('ascii');
+		const [email, password] = decodedAuthData.split(':');
+		const user = await UserService.findUserByEmail(email);
+
+		if (!user) {
+			return next(new ForbiddenException('unauthorized_user_update'));
+		}
+
+		if (user.id !== +req.params.userId) {
+			return next(new ForbiddenException('unauthorized_user_update'));
+		}
+
+		if (user.inactive) {
+			return next(new ForbiddenException('unauthorized_user_update'));
+		}
+
+		const match = await bcrypt.compare(password, user.password);
+		if (!match) {
+			return next(new ForbiddenException('unauthorized_user_update'));
+		}
+		await UserService.updateUser(req.params.userId, req.body);
+		return res.status(200).send();
 	}
-	const users = await UserService.getUsers(page);
-	res.status(200).send(users);
+
+	return next(new ForbiddenException('unauthorized_user_update'));
 });
 
 module.exports = router;
