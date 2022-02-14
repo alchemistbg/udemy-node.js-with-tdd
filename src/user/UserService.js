@@ -6,6 +6,7 @@ const User = require('./User');
 const EmailService = require('../email/EmailService');
 const EmailException = require('../email/EmailException');
 const InvalidTokenException = require('./InvalidTokenException');
+const UserNotFoundException = require('./UserNotFoundException');
 
 const generateToken = (length) => {
 	// return crypto.randomBytes(length).toString('hex');
@@ -88,9 +89,17 @@ const getUser = async (userId) => {
 	return user;
 };
 
+const updateUser = async (userId, updatedInfo) => {
+	const user = await User.findOne({ where: { id: userId } });
+	user.username = updatedInfo.username;
+	await user.save();
+}
+
 module.exports = {
 	saveUser,
 	activateUser,
 	findUserByEmail,
 	getUsers,
+	getUser,
+	updateUser,
 };
