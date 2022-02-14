@@ -1,8 +1,11 @@
 const express = require('express');
 const { check, validationResult } = require('express-validator');
+const bcrypt = require('bcrypt');
 
 const UserService = require('./UserService');
+const pagination = require('../middleware/pagination');
 const ValidationException = require('../error/ValidationException');
+const ForbiddenException = require('../error/ForbiddenException');
 
 const router = express.Router();
 
@@ -54,7 +57,7 @@ router.post(
 router.post('/activation/:token', async (req, res, next) => {
 	const { token } = req.params;
 	try {
-		await UserService.activateUser(token); 
+		await UserService.activateUser(token);
 		return res.status(200).send({ message: req.t('account_activation_success') });
 	} catch (error) {
 		next(error);
